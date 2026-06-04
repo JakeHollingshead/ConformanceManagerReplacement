@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Manufacturers{% endblock %}
+
+{% block page_title %}Manufacturers{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <button class="btn btn-primary" onclick="openModal('addMfrModal')">+ New Manufacturer</button>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <!-- <th>ID</th> -->
+            <th class="sortable">Name</th>
+            <th class="sortable">Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mfr in manufacturers %}
+        <tr>
+            <!-- <td>{{ mfr.mfr_id }}</td> -->
+            <td>{{ mfr.mfr_name }}</td>
+            <td>{{ mfr.mfr_descr }}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary"
+                    data-mfr-id="{{ mfr.mfr_id }}"
+                    data-mfr-name="{{ mfr.mfr_name | e }}"
+                    data-mfr-descr="{{ mfr.mfr_descr | e }}"
+                    onclick="openEditMfr(this)">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="confirmDeleteMfr('{{ mfr.mfr_id }}')">Delete</button>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="text-align:center;">No manufacturers found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Add Manufacturer Modal -->
+<div id="addMfrModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Add Manufacturer</h2>
+        <form method="POST" action="/Manufacturers/add">
+            <label>Name</label>
+            <input type="text" name="mfr_name" required>
+            <label>Description</label>
+            <textarea name="mfr_descr" required></textarea>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addMfrModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Manufacturer Modal -->
+<div id="editMfrModal" class="modal hidden" onclick="closeModal('editMfrModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Edit Manufacturer</h2>
+            <button type="button" class="modal-close" onclick="closeModal('editMfrModal')">&times;</button>
+        </div>
+        <form method="POST" action="/Manufacturers/edit">
+            <input type="hidden" id="edit_mfr_id" name="mfr_id">
+            <label>Name</label>
+            <input type="text" id="edit_mfr_name" name="mfr_name" required>
+            <label>Description</label>
+            <textarea id="edit_mfr_descr" name="mfr_descr" required></textarea>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editMfrModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Manufacturer Modal -->
+<div id="deleteMfrModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete this manufacturer?</p>
+        <form method="POST" action="/Manufacturers/delete">
+            <input type="hidden" id="delete_mfr_id" name="mfr_id">
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteMfrModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function openEditMfr(btn) {
+    document.getElementById('edit_mfr_id').value = btn.dataset.mfrId;
+    document.getElementById('edit_mfr_name').value = btn.dataset.mfrName;
+    document.getElementById('edit_mfr_descr').value = btn.dataset.mfrDescr;
+    openModal('editMfrModal');
+}
+function confirmDeleteMfr(id) {
+    document.getElementById('delete_mfr_id').value = id;
+    openModal('deleteMfrModal');
+}
+</script>
+{% endblock %}

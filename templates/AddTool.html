@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Tool{% endblock %}
+{% block page_title %}Add New Tool{% endblock %}
+
+{% block content %}
+
+<!-- Step Progress Indicator -->
+<div class="wizard-progress">
+    <div class="wizard-step active" id="prog-1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Manufacturer</div>
+    </div>
+    <div class="wizard-connector" id="conn-1"></div>
+    <div class="wizard-step" id="prog-2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Model</div>
+    </div>
+    <div class="wizard-connector" id="conn-2"></div>
+    <div class="wizard-step" id="prog-3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Unit &amp; Service</div>
+    </div>
+</div>
+
+<form method="POST" action="/AddTool/submit" id="addToolForm">
+
+<!-- ============================================================ -->
+<!-- STEP 1: MANUFACTURER                                          -->
+<!-- ============================================================ -->
+<div class="wizard-panel active" id="panel-1">
+    <h3 class="wizard-panel-title">Manufacturer</h3>
+
+    <div class="toggle-group">
+        <label class="toggle-option">
+            <input type="radio" name="mfr_mode" value="existing" checked onchange="toggleMfrMode('existing')">
+            Select Existing
+        </label>
+        <label class="toggle-option">
+            <input type="radio" name="mfr_mode" value="new" onchange="toggleMfrMode('new')">
+            Add New
+        </label>
+    </div>
+
+    <div id="mfr-existing-section">
+        <label>Manufacturer</label>
+        <select id="existing_mfr_id" name="existing_mfr_id">
+            <option value="">-- Select Manufacturer --</option>
+            {% for mfr in manufacturers %}
+            <option value="{{ mfr.mfr_id }}" data-name="{{ mfr.mfr_name | e }}">{{ mfr.mfr_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="mfr-new-section" style="display:none">
+        <label>Manufacturer Name <span class="required">*</span></label>
+        <input type="text" id="new_mfr_name" name="new_mfr_name" placeholder="e.g. Acme Gauges Inc.">
+        <label>Description</label>
+        <textarea id="new_mfr_descr" name="new_mfr_descr" rows="2" placeholder="Optional"></textarea>
+    </div>
+
+    <div class="wizard-nav">
+        <button type="button" class="btn btn-primary" onclick="goToStep(2)">Next &rarr;</button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- STEP 2: MODEL                                                 -->
+<!-- ============================================================ -->
+<div class="wizard-panel" id="panel-2">
+    <div class="breadcrumb-trail" id="breadcrumb-2"></div>
+    <h3 class="wizard-panel-title">Model</h3>
+
+    <div class="toggle-group">
+        <label class="toggle-option">
+            <input type="radio" name="md_mode" value="existing" checked onchange="toggleMdMode('existing')">
+            Select Existing
+        </label>
+        <label class="toggle-option">
+            <input type="radio" name="md_mode" value="new" onchange="toggleMdMode('new')">
+            Add New
+        </label>
+    </div>
+
+    <div id="md-existing-section">
+        <label>Model</label>
+        <select id="existing_md_id" name="existing_md_id">
+            <option value="">-- Select Model --</option>
+        </select>
+        <p id="no-models-msg" style="display:none; color:#888; font-size:13px; margin-top:6px;">
+            No models found for this manufacturer — switch to "Add New" above.
+        </p>
+    </div>
+
+    <div id="md-new-section" style="display:none">
+        <label>Model Name <span class="required">*</span></label>
+        <input type="text" id="new_md_name" name="new_md_name" placeholder="e.g. Precision Series 500">
+        <label>Size  One</label>
+        <input type="text" id="new_md_size" name="new_md_size" placeholder="e.g. 1">
+        <label>Size Two</label>
+        <input type="text" id="new_md_endsize" name="new_md_endsize" placeholder="e.g. 4">
+        <label>Description</label>
+        <textarea id="new_md_description" name="new_md_description" rows="2" placeholder="Optional"></textarea>
+    </div>
+
+    <div class="wizard-nav">
+        <button type="button" class="btn btn-secondary" onclick="goToStep(1)">&larr; Back</button>
+        <button type="button" class="btn btn-primary" onclick="goToStep(3)">Next &rarr;</button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- STEP 3: UNIT & SERVICE                                        -->
+<!-- ============================================================ -->
+<div class="wizard-panel" id="panel-3">
+    <div class="breadcrumb-trail" id="breadcrumb-3"></div>
+    <h3 class="wizard-panel-title">Unit & Service</h3>
+
+    <label>Location <span class="required">*</span></label>
+    <select id="uni_loc_id" name="uni_loc_id">
+        <option value="">-- Select Location --</option>
+        {% for loc in locations %}
+        <option value="{{ loc.loc_id }}">{{ loc.loc_name }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Gauge Number</label>
+    <input type="text" name="uni_asset_tag" placeholder="e.g. G-00142">
+
+    <label>Calibrated By<span class="required">*</span></label>
+    <select name="srv_user_id">
+        <option value="">-- Select User --</option>
+        {% for user in users %}
+        <option value="{{ user.user_id }}">{{ user.user_name }}</option>
+        {% endfor %}
+    </select>
+
+    <label style="display:flex; align-items:center; gap:0.5rem;">
+        Certificate
+        <span style="font-size:12px; font-weight:normal; color:#888;">
+            <input type="checkbox" id="cert_override" onchange="toggleCertOverride(this)" style="margin-right:3px;">
+            Override
+        </span>
+    </label>
+    <input type="text" id="srv_cert" name="srv_cert" value="{{ next_cert }}" readonly
+           style="background:#f5f5f5; color:#888; cursor:not-allowed;">
+
+    <div class="datetime-group">
+        <label>Calibration Date</label>
+        <input type="datetime-local" name="srv_calibration_date">
+    </div>
+
+    <div class="datetime-group">
+        <label>Last Service Date</label>
+        <input type="datetime-local" name="srv_last_date">
+    </div>
+
+    <div class="datetime-group">
+        <label>Next Service Date</label>
+        <input type="datetime-local" name="srv_next_date">
+    </div>
+
+    <label>Post Condition <span class="required">*</span></label>
+    <select name="srv_post_condition">
+        <option value="New" selected>New</option>
+        <option value="Good">Good</option>
+        <option value="Poor">Poor</option>
+        <option value="Bad">Bad</option>
+    </select>
+
+    <label>Description</label>
+    <textarea name="srv_description" rows="2" placeholder="e.g. Initial calibration on receipt"></textarea>
+
+    <div class="wizard-nav">
+        <button type="button" class="btn btn-secondary" onclick="goToStep(2)">&larr; Back</button>
+        <button type="submit" class="btn btn-primary">Save Tool</button>
+    </div>
+</div>
+
+</form>
+
+<script>
+const allModels = [
+    {% for md in models %}
+    {"id": {{ md.md_id | tojson }}, "name": {{ md.md_name | tojson }}, "size": {{ md.md_size | tojson }}, "endsize": {{ md.md_endsize | tojson }}, "mfrId": {{ md.md_mfr_id | tojson }}}{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+let currentStep = 1;
+let selectedMfrId = null;
+let selectedMfrName = '';
+let selectedMdName = '';
+
+function goToStep(target) {
+    if (target > currentStep && !validateStep(currentStep)) return;
+    if (target > currentStep) captureStep(currentStep);
+
+    document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + target).classList.add('active');
+
+    document.querySelectorAll('.wizard-step').forEach((el, i) => {
+        el.classList.remove('active', 'completed');
+        if (i + 1 < target)  el.classList.add('completed');
+        if (i + 1 === target) el.classList.add('active');
+    });
+
+    document.querySelectorAll('.wizard-connector').forEach((el, i) => {
+        el.classList.toggle('completed', i + 1 < target);
+    });
+
+    updateBreadcrumb(target);
+    currentStep = target;
+    window.scrollTo(0, 0);
+}
+
+function captureStep(step) {
+    if (step === 1) {
+        const mode = document.querySelector('input[name="mfr_mode"]:checked').value;
+        if (mode === 'existing') {
+            const sel = document.getElementById('existing_mfr_id');
+            selectedMfrId = sel.value;
+            selectedMfrName = sel.options[sel.selectedIndex]?.dataset?.name || sel.options[sel.selectedIndex]?.text || '';
+        } else {
+            selectedMfrId = '__new__';
+            selectedMfrName = document.getElementById('new_mfr_name').value.trim() || 'New Manufacturer';
+        }
+        populateModelDropdown();
+    } else if (step === 2) {
+        const mode = document.querySelector('input[name="md_mode"]:checked').value;
+        if (mode === 'existing') {
+            const sel = document.getElementById('existing_md_id');
+            selectedMdName = sel.options[sel.selectedIndex]?.text || '';
+        } else {
+            selectedMdName = document.getElementById('new_md_name').value.trim() || 'New Model';
+        }
+    }
+}
+
+function validateStep(step) {
+    if (step === 1) {
+        const mode = document.querySelector('input[name="mfr_mode"]:checked').value;
+        if (mode === 'existing' && !document.getElementById('existing_mfr_id').value) {
+            alert('Please select a manufacturer.'); return false;
+        }
+        if (mode === 'new' && !document.getElementById('new_mfr_name').value.trim()) {
+            alert('Please enter a manufacturer name.'); return false;
+        }
+    }
+    if (step === 2) {
+        const mode = document.querySelector('input[name="md_mode"]:checked').value;
+        if (mode === 'existing' && !document.getElementById('existing_md_id').value) {
+            alert('Please select a model.'); return false;
+        }
+        if (mode === 'new' && !document.getElementById('new_md_name').value.trim()) {
+            alert('Please enter a model name.'); return false;
+        }
+    }
+    if (step === 3) {
+        if (!document.getElementById('uni_loc_id').value) {
+            alert('Please select a location.'); return false;
+        }
+    }
+    return true;
+}
+
+function updateBreadcrumb(step) {
+    const sep = '<span class="crumb-sep"> › </span>';
+    if (step >= 2) {
+        document.getElementById('breadcrumb-2').innerHTML =
+            '<span>' + selectedMfrName + '</span>';
+    }
+    if (step >= 3) {
+        document.getElementById('breadcrumb-3').innerHTML =
+            '<span>' + selectedMfrName + '</span>' + sep + '<span>' + selectedMdName + '</span>';
+    }
+}
+
+function populateModelDropdown() {
+    const sel = document.getElementById('existing_md_id');
+    sel.innerHTML = '<option value="">-- Select Model --</option>';
+    const filtered = selectedMfrId === '__new__' ? [] : allModels.filter(m => m.mfrId === selectedMfrId);
+    filtered.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = [m.name, '|', m.size, '-', m.endsize].filter(Boolean).join(' ');
+        sel.appendChild(opt);
+    });
+    const noMsg = document.getElementById('no-models-msg');
+    if (filtered.length === 0) {
+        noMsg.style.display = '';
+        document.querySelector('input[name="md_mode"][value="new"]').checked = true;
+        toggleMdMode('new');
+    } else {
+        noMsg.style.display = 'none';
+        document.querySelector('input[name="md_mode"][value="existing"]').checked = true;
+        toggleMdMode('existing');
+    }
+}
+
+function toggleMfrMode(val) {
+    document.getElementById('mfr-existing-section').style.display = val === 'existing' ? '' : 'none';
+    document.getElementById('mfr-new-section').style.display      = val === 'new'      ? '' : 'none';
+}
+
+function toggleMdMode(val) {
+    document.getElementById('md-existing-section').style.display = val === 'existing' ? '' : 'none';
+    document.getElementById('md-new-section').style.display      = val === 'new'      ? '' : 'none';
+}
+
+function toggleCertOverride(cb) {
+    const input = document.getElementById('srv_cert');
+    if (cb.checked) {
+        input.removeAttribute('readonly');
+        input.style.background = '';
+        input.style.color = '';
+        input.style.cursor = '';
+        input.focus();
+    } else {
+        input.setAttribute('readonly', '');
+        input.style.background = '#f5f5f5';
+        input.style.color = '#888';
+        input.style.cursor = 'not-allowed';
+    }
+}
+</script>
+
+{% endblock %}

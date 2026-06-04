@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Units{% endblock %}
+
+{% block page_title %}Units{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <button class="btn btn-primary" onclick="openModal('addModal')">+ New Unit</button>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <!-- <th>ID</th> -->
+            <th class="sortable">Name</th>
+            <th class="sortable">Description</th>
+            <th class="sortable">Model</th>
+            <th class="sortable">Location</th>
+            <th class="sortable">Guage Number</th>
+            <th class="sortable">Serial #</th>
+            <th class="sortable">Equipment #</th>
+            <th class="sortable">Created</th>
+            <th class="sortable">Updated</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for unit in units %}
+        <tr>
+            <!-- <td>{{ unit.uni_id }}</td> -->
+            <td>{{ unit.uni_name }}</td>
+            <td>{{ unit.uni_description }}</td>
+            <td>{{ unit.md_name }}</td>
+            <td>{{ unit.loc_name }}</td>
+            <td>{{ unit.uni_asset_tag }}</td>
+            <td>{{ unit.uni_serial_number }}</td>
+            <td>{{ unit.uni_equipment_number }}</td>
+            <td>{{ unit.unit_create_ts | fmt_ts }}</td>
+            <td>{{ unit.unit_update_ts | fmt_ts }}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="openEdit(
+                    '{{ unit.uni_id }}', '{{ unit.uni_name }}', '{{ unit.uni_description }}',
+                    '{{ unit.uni_md_id }}', '{{ unit.uni_loc_id }}', '{{ unit.uni_asset_tag }}',
+                    '{{ unit.uni_serial_number }}', '{{ unit.uni_equipment_number }}'
+                )">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ unit.uni_id }}')">Delete</button>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10" style="text-align:center;">No units found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Add Unit</h2>
+        <form method="POST" action="/Units/add">
+            <label>Name</label>
+            <input type="text" name="uni_name" required>
+            <label>Description</label>
+            <textarea name="uni_description"></textarea>
+            <label>Model</label>
+            <select name="uni_md_id" required>
+                {% for md in models %}
+                <option value="{{ md.md_id }}">{{ md.md_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Location</label>
+            <select name="uni_loc_id" required>
+                {% for loc in locations %}
+                <option value="{{ loc.loc_id }}">{{ loc.loc_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Guage Serial Number</label>
+            <input type="text" name="uni_asset_tag" required>
+            <label>Serial Number</label>
+            <input type="text" name="uni_serial_number" required>
+            <label>Equipment Number</label>
+            <input type="text" name="uni_equipment_number" required>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal hidden" onclick="closeModal('editModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Edit Unit</h2>
+            <button type="button" class="modal-close" onclick="closeModal('editModal')">&times;</button>
+        </div>
+        <form method="POST" action="/Units/edit">
+            <input type="hidden" id="edit_uni_id" name="uni_id">
+            <label>Name</label>
+            <input type="text" id="edit_uni_name" name="uni_name" required>
+            <label>Description</label>
+            <textarea id="edit_uni_description" name="uni_description" required></textarea>
+            <label>Model</label>
+            <select id="edit_uni_md_id" name="uni_md_id" required>
+                {% for md in models %}
+                <option value="{{ md.md_id }}">{{ md.md_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Location</label>
+            <select id="edit_uni_loc_id" name="uni_loc_id" required>
+                {% for loc in locations %}
+                <option value="{{ loc.loc_id }}">{{ loc.loc_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Guage SN</label>
+            <input type="text" id="edit_uni_asset_tag" name="uni_asset_tag" required>
+            <label>Equipment Number</label>
+            <input type="text" id="edit_uni_equipment_number" name="uni_equipment_number" required>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete this unit?</p>
+        <form method="POST" action="/Units/delete">
+            <input type="hidden" id="delete_uni_id" name="uni_id">
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function openEdit(id, name, descr, mdId, locId, assetTag, serial, equipNum) {
+    document.getElementById('edit_uni_id').value = id;
+    document.getElementById('edit_uni_name').value = name;
+    document.getElementById('edit_uni_description').value = descr;
+    document.getElementById('edit_uni_md_id').value = mdId;
+    document.getElementById('edit_uni_loc_id').value = locId;
+    document.getElementById('edit_uni_asset_tag').value = assetTag;
+    document.getElementById('edit_uni_serial_number').value = serial;
+    document.getElementById('edit_uni_equipment_number').value = equipNum;
+    openModal('editModal');
+}
+function confirmDelete(id) {
+    document.getElementById('delete_uni_id').value = id;
+    openModal('deleteModal');
+}
+</script>
+{% endblock %}

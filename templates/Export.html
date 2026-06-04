@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Export{% endblock %}
+
+{% block page_title %}Export Results{% endblock %}
+
+{% block content %}
+<p>Download a full export of the CRIMan database as an Excel workbook. Each table is written to its own sheet with resolved names in place of GUIDs.</p>
+
+<table class="data-table" style="width: auto; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th>Sheet</th>
+            <th>Contents</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Locations</td><td>All location records</td></tr>
+        <tr><td>Manufacturers</td><td>All manufacturer records</td></tr>
+        <tr><td>Models</td><td>All models with manufacturer name resolved</td></tr>
+        <tr><td>Units</td><td>Active units with model and location names resolved</td></tr>
+        <tr><td>Users</td><td>All users</td></tr>
+        <tr><td>Service</td><td>All service records ordered by next service date, with unit and user names resolved</td></tr>
+    </tbody>
+</table>
+
+<div style="margin-top: 30px;">
+    <a href="/Export/download" class="btn btn-primary">&#11123; Download XLSX</a>
+</div>
+
+<div style="margin-top: 35px;">
+    <a href="/Export/downloadOld" class="btn btn-primary">&#11123; Download Damaged Units XLSX</a>
+</div>
+
+<div style="margin-top: 40px;">
+    <a href="/Export/downloadService" class="btn btn-primary">&#11123; Download Service Records XLSX</a>
+</div>
+
+<div style="margin-top: 45px;">
+    <a href="/Export/downloadBackup" class="btn btn-primary">&#11123; Download Backup XLSX</a>
+</div>
+{% endblock %}

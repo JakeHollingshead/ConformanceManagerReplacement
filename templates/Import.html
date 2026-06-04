@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Import{% endblock %}
+{% block page_title %}Import{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 600px;">
+
+    <!-- Download Template -->
+    <div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 24px;">
+        <h2 style="margin: 0 0 10px; font-size: 17px; color: #A99A6F;">Download Import Template</h2>
+        <p style="margin: 0 0 16px; color: #555; font-size: 14px;">
+            Use this template to prepare your data. Fill in each sheet and upload below.
+            Existing records with matching IDs will be updated; new IDs will be inserted.
+        </p>
+        <a href="/Import/template" class="btn btn-secondary" style="text-decoration:none; display:inline-block;">
+            ⬇ Download CRIMan_Import.xlsx
+        </a>
+    </div>
+
+    <!-- Upload Form -->
+    <div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <h2 style="margin: 0 0 16px; font-size: 17px; color: #A99A6F;">Upload File</h2>
+
+        {% if error %}
+        <div style="background: #fdf0f0; border: 1px solid #e8b4b4; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; color: #8b2020; font-size: 14px;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if counts is defined %}
+        <div style="background: #f2f7ee; border: 1px solid #b4d4a0; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px; color: #2a5a1a;">
+            <strong>Import complete.</strong>
+            <ul style="margin: 8px 0 0; padding-left: 20px;">
+                {% for sheet, n in counts.items() %}
+                <li>{{ sheet }}: {{ n }} row{{ 's' if n != 1 else '' }} imported</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/Import/upload" enctype="multipart/form-data">
+            <label>Select .xlsx file</label>
+            <input type="file" name="file" accept=".xlsx" required>
+            <div style="margin-top: 16px;">
+                <button type="submit" class="btn btn-primary">Upload &amp; Import</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}

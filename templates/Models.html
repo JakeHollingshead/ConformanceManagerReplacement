@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Models{% endblock %}
+
+{% block page_title %}Models{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <button class="btn btn-primary" onclick="openModal('addMdModal')">+ New Model</button>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <!-- <th>ID</th> -->
+            <th class="sortable">Name</th>
+            <th class="sortable">Size</th>
+            <th class="sortable">End Size</th>
+            <th class="sortable">Manufacturer</th>
+            <th class="sortable">Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for md in models %}
+        <tr>
+            <!-- <td>{{ md.md_id }}</td> -->
+            <td>{{ md.md_name }}</td>
+            <td>{{ md.md_size }}</td>
+            <td>{{ md.md_endsize }}</td>
+            <td>{{ md.mfr_name }}</td>
+            <td>{{ md.md_description }}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary"
+                    data-md-id="{{ md.md_id }}"
+                    data-md-name="{{ md.md_name | e }}"
+                    data-md-size="{{ md.md_size | e }}"
+                    data-md-endsize="{{ md.md_endsize | e }}"
+                    data-md-mfr-id="{{ md.md_mfr_id }}"
+                    data-md-description="{{ md.md_description | e }}"
+                    onclick="openEditMd(this)">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="confirmDeleteMd('{{ md.md_id }}')">Delete</button>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;">No models found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Add Model Modal -->
+<div id="addMdModal" class="modal hidden" onclick="closeModal('addMdModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Add Model</h2>
+            <button type="button" class="modal-close" onclick="closeModal('addMdModal')">&times;</button>
+        </div>
+        <form method="POST" action="/Models/add">
+            <label>Name</label>
+            <input type="text" name="md_name" required>
+            <label>Size</label>
+            <input type="text" name="md_size" required>
+            <label>End Size</label>
+            <input type="text" name="md_endsize">
+            <label>Manufacturer</label>
+            <select name="md_mfr_id" required>
+                {% for mfr in manufacturers %}
+                <option value="{{ mfr.mfr_id }}">{{ mfr.mfr_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Description</label>
+            <textarea name="md_description"></textarea>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addMdModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Model Modal -->
+<div id="editMdModal" class="modal hidden" onclick="closeModal('editMdModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Edit Model</h2>
+            <button type="button" class="modal-close" onclick="closeModal('editMdModal')">&times;</button>
+        </div>
+        <form method="POST" action="/Models/edit">
+            <input type="hidden" id="edit_md_id" name="md_id">
+            <label>Name</label>
+            <input type="text" id="edit_md_name" name="md_name" required>
+            <label>Size</label>
+            <input type="text" id="edit_md_size" name="md_size" required>
+            <label>End Size</label>
+            <input type="text" id="edit_md_endsize" name="md_endsize">
+            <label>Manufacturer</label>
+            <select id="edit_md_mfr_id" name="md_mfr_id" required>
+                {% for mfr in manufacturers %}
+                <option value="{{ mfr.mfr_id }}">{{ mfr.mfr_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Description</label>
+            <textarea id="edit_md_description" name="md_description"></textarea>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editMdModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Model Modal -->
+<div id="deleteMdModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete this model?</p>
+        <form method="POST" action="/Models/delete">
+            <input type="hidden" id="delete_md_id" name="md_id">
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteMdModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function openEditMd(btn) {
+    document.getElementById('edit_md_id').value = btn.dataset.mdId;
+    document.getElementById('edit_md_name').value = btn.dataset.mdName;
+    document.getElementById('edit_md_size').value = btn.dataset.mdSize;
+    document.getElementById('edit_md_endsize').value = btn.dataset.mdEndsize;
+    document.getElementById('edit_md_mfr_id').value = btn.dataset.mdMfrId;
+    document.getElementById('edit_md_description').value = btn.dataset.mdDescription;
+    openModal('editMdModal');
+}
+function confirmDeleteMd(id) {
+    document.getElementById('delete_md_id').value = id;
+    openModal('deleteMdModal');
+}
+</script>
+{% endblock %}

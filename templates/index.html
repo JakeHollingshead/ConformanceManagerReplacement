@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Conforumance Manager{% endblock %}
+
+{% block page_title %}CRIMan{% endblock %}
+
+{% block content %}
+    <h2>Upcoming Service</h2>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="sortable">Certificate</th>
+                <!-- <th class="sortable">Type</th> -->
+                <th class="sortable">User</th>
+                <th class="sortable">Calibration Date</th>
+                <th class="sortable">Last Service</th>
+                <th class="sortable">Next Service</th>
+                <th class="sortable">Post Condition</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for srv in services %}
+            <tr>
+                <td>{{ srv.srv_cert }}</td>
+                <!-- <td>{{ srv.srv_type }}</td> -->
+                <td>{{ srv.user_name }}</td>
+                <td>{{ srv.srv_calibration_date | fmt_ts }}</td>
+                <td>{{ srv.srv_last_date | fmt_ts }}</td>
+                <td>{{ srv.srv_next_date | fmt_ts }}</td>
+                <td>{{ srv.srv_post_condition }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="10" style="text-align:center;">No service records found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

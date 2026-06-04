@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Locations{% endblock %}
+
+{% block page_title %}Locations{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <button class="btn btn-primary" onclick="openModal('addModal')">+ New Location</button>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <!-- <th>ID</th> -->
+            <th class="sortable">Name</th>
+            <th class="sortable">Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for loc in locations %}
+        <tr>
+            <!-- <td>{{ loc.loc_id }}</td> -->
+            <td>{{ loc.loc_name }}</td>
+            <td>{{ loc.loc_description }}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="openEdit('{{ loc.loc_id }}', '{{ loc.loc_name }}', '{{ loc.loc_description }}')">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ loc.loc_id }}')">Delete</button>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="text-align:center;">No locations found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Add Location</h2>
+        <form method="POST" action="/Locations/add">
+            <label>Name</label>
+            <input type="text" name="loc_name" required>
+            <label>Description</label>
+            <textarea name="loc_description"></textarea>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal hidden" onclick="closeModal('editModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Edit Location</h2>
+            <button type="button" class="modal-close" onclick="closeModal('editModal')">&times;</button>
+        </div>
+        <form method="POST" action="/Locations/edit">
+            <input type="hidden" id="edit_loc_id" name="loc_id">
+            <label>Name</label>
+            <input type="text" id="edit_loc_name" name="loc_name" required>
+            <label>Description</label>
+            <textarea id="edit_loc_description" name="loc_description" required></textarea>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div id="deleteModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete this location?</p>
+        <form method="POST" action="/Locations/delete">
+            <input type="hidden" id="delete_loc_id" name="loc_id">
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openEdit(id, name, descr) {
+    document.getElementById('edit_loc_id').value = id;
+    document.getElementById('edit_loc_name').value = name;
+    document.getElementById('edit_loc_description').value = descr;
+    openModal('editModal');
+}
+function confirmDelete(id) {
+    document.getElementById('delete_loc_id').value = id;
+    openModal('deleteModal');
+}
+</script>
+{% endblock %}

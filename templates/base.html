@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CRIMan{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="topnav">
+        <div class="topnav-brand">
+            <img src="/static/GenLogo.png" alt="Gen Logo" class="topnav-logo">
+        </div>
+        <ul class="topnav-links">
+
+            <!-- Home -->
+            <li>
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Home</span>
+                </a>
+            </li>
+
+            <!-- Add Tool -->
+            <li>
+                <a href="/AddTool" class="nav-link {% if request.path == '/AddTool' %}active{% endif %}">
+                    <span class="nav-icon">➕</span>
+                    <span class="nav-text">Add Tool</span>
+                </a>
+            </li>
+
+            <!-- Equipment dropdown -->
+            <li class="nav-dropdown">
+                <button class="nav-dropdown-toggle {% if request.path in ['/Manufacturers', '/Models', '/Service'] %}active{% endif %}"
+                        onclick="toggleDropdown(this)">
+                    <span class="nav-icon">🔩</span>
+                    <span class="nav-text">Equipment</span>
+                    <span class="nav-caret">▼</span>
+                </button>
+                <ul class="nav-dropdown-menu">
+                    <li>
+                        <a href="/Manufacturers" class="nav-dropdown-item {% if request.path == '/Manufacturers' %}active{% endif %}">
+                            Manufacturers
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Models" class="nav-dropdown-item {% if request.path == '/Models' %}active{% endif %}">
+                            Models
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Service" class="nav-dropdown-item {% if request.path == '/Service' %}active{% endif %}">
+                            Service
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Administration dropdown -->
+            <li class="nav-dropdown">
+                <button class="nav-dropdown-toggle {% if request.path in ['/Locations', '/Users', '/Help'] %}active{% endif %}"
+                        onclick="toggleDropdown(this)">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Administration</span>
+                    <span class="nav-caret">▼</span>
+                </button>
+                <ul class="nav-dropdown-menu">
+                    <li>
+                        <a href="/Locations" class="nav-dropdown-item {% if request.path == '/Locations' %}active{% endif %}">
+                            Locations
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Users" class="nav-dropdown-item {% if request.path == '/Users' %}active{% endif %}">
+                            Users
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Help" class="nav-dropdown-item {% if request.path == '/Help' %}active{% endif %}">
+                            Help
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Data dropdown -->
+            <li class="nav-dropdown">
+                <button class="nav-dropdown-toggle {% if request.path in ['/Export', '/Import', '/Scheduler'] %}active{% endif %}"
+                        onclick="toggleDropdown(this)">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Data</span>
+                    <span class="nav-caret">▼</span>
+                </button>
+                <ul class="nav-dropdown-menu">
+                    <li>
+                        <a href="/Export" class="nav-dropdown-item {% if request.path == '/Export' %}active{% endif %}">
+                            Export
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Import" class="nav-dropdown-item {% if request.path == '/Import' %}active{% endif %}">
+                            Import
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Scheduler" class="nav-dropdown-item {% if request.path == '/Scheduler' %}active{% endif %}">
+                            Schedule
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+        </ul>
+
+        <!-- Logout -->
+        <a href="/logout" class="nav-link" style="margin-left:auto; padding: 0 1rem;">
+            <span class="nav-icon">🔓</span>
+            <span class="nav-text">Logout</span>
+        </a>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <header class="top-header">
+            <h1>{% block page_title %}{% endblock %}</h1>
+        </header>
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+<script>
+function toggleDropdown(btn) {
+    const dropdown = btn.closest('.nav-dropdown');
+    const wasOpen = dropdown.classList.contains('open');
+    document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+    if (!wasOpen) dropdown.classList.add('open');
+}
+
+document.addEventListener('click', function (e) {
+    if (!e.target.closest('.nav-dropdown')) {
+        document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+    }
+});
+
+document.addEventListener('click', function (e) {
+    const th = e.target.closest('th.sortable');
+    if (!th) return;
+    const tbody = th.closest('table').querySelector('tbody');
+    const colIndex = Array.from(th.parentElement.children).indexOf(th);
+    const asc = !th.classList.contains('sort-asc');
+    th.closest('tr').querySelectorAll('th').forEach(t => t.classList.remove('sort-asc', 'sort-desc'));
+    th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+    Array.from(tbody.querySelectorAll('tr'))
+        .sort((a, b) => {
+            const av = (a.cells[colIndex]?.textContent || '').trim();
+            const bv = (b.cells[colIndex]?.textContent || '').trim();
+            const an = parseFloat(av), bn = parseFloat(bv);
+            if (!isNaN(an) && !isNaN(bn)) return asc ? an - bn : bn - an;
+            const ad = Date.parse(av), bd = Date.parse(bv);
+            if (!isNaN(ad) && !isNaN(bd)) return asc ? ad - bd : bd - ad;
+            return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+        })
+        .forEach(row => tbody.appendChild(row));
+});
+</script>
+</body>
+</html>

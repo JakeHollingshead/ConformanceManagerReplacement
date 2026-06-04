@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Service Records{% endblock %}
+{% block page_title %}Service Records{% endblock %}
+
+{% block content %}
+
+<div class="toolbar">
+    <button class="btn btn-primary" onclick="openModal('addModal')">+ New Service Record</button>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal hidden" onclick="closeModal('addModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Add Service Record</h2>
+            <button type="button" class="modal-close" onclick="closeModal('addModal')">&times;</button>
+        </div>
+        <form method="POST" action="/Service/add">
+            <label>Model <span class="required">*</span></label>
+            <select name="srv_md_id" required>
+                <option value="">-- Select Model --</option>
+                {% for md in models %}
+                <option value="{{ md.md_id }}">{{ md.mfr_name }} — {{ md.md_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Location</label>
+            <select name="srv_loc_id">
+                <option value="">-- Select Location --</option>
+                {% for loc in locations %}
+                <option value="{{ loc.loc_id }}">{{ loc.loc_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Gauge Serial Number</label>
+            <input type="text" name="srv_asset_tag" placeholder="e.g. CD-698-GX">
+            <!-- <label>Type <span class="required">*</span></label> -->
+            <!-- <input type="text" name="srv_type" required> -->
+            <label>Description</label>
+            <textarea name="srv_description"></textarea>
+            <label>User <span class="required">*</span></label>
+            <select name="srv_user_id" required>
+                <option value="">-- Select User --</option>
+                {% for user in users %}
+                <option value="{{ user.user_id }}">{{ user.user_name }}</option>
+                {% endfor %}
+            </select>
+            <div class="datetime-group">
+                <label>Calibration Date</label>
+                <input type="datetime-local" name="srv_calibration_date">
+            </div>
+            <label>Certificate</label>
+            <input type="text" name="srv_cert" value="{{ next_cert }}">
+            <div class="datetime-group">
+                <label>Last Service Date</label>
+                <input type="datetime-local" name="srv_last_date">
+            </div>
+            <div class="datetime-group">
+                <label>Next Service Date</label>
+                <input type="datetime-local" name="srv_next_date">
+            </div>
+            <label>Post Condition <span class="required">*</span></label>
+            <select name="srv_post_condition" required>
+                <option value="New">New</option>
+                <option value="Good">Good</option>
+                <option value="Poor">Poor</option>
+                <option value="Bad">Bad</option>
+            </select>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal hidden" onclick="closeModal('editModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Edit Service Record</h2>
+            <button type="button" class="modal-close" onclick="closeModal('editModal')">&times;</button>
+        </div>
+        <form method="POST" action="/Service/edit">
+            <input type="hidden" id="edit_srv_id" name="srv_id">
+            <label>Model <span class="required">*</span></label>
+            <select id="edit_srv_md_id" name="srv_md_id" required>
+                {% for md in models %}
+                <option value="{{ md.md_id }}">{{ md.mfr_name }} — {{ md.md_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Location</label>
+            <select id="edit_srv_loc_id" name="srv_loc_id">
+                <option value="">-- Select Location --</option>
+                {% for loc in locations %}
+                <option value="{{ loc.loc_id }}">{{ loc.loc_name }}</option>
+                {% endfor %}
+            </select>
+            <label>Gauge Serial Number</label>
+            <input type="text" id="edit_srv_asset_tag" name="srv_asset_tag" placeholder="e.g. G-00142">
+            <!-- <label>Type <span class="required">*</span></label> -->
+            <!-- <input type="text" id="edit_srv_type" name="srv_type" required> -->
+            <label>Description</label>
+            <textarea id="edit_srv_description" name="srv_description"></textarea>
+            <label>User <span class="required">*</span></label>
+            <select id="edit_srv_user_id" name="srv_user_id" required>
+                {% for user in users %}
+                <option value="{{ user.user_id }}">{{ user.user_name }}</option>
+                {% endfor %}
+            </select>
+            <div class="datetime-group">
+                <label>Calibration Date</label>
+                <input type="datetime-local" id="edit_srv_calibration_date" name="srv_calibration_date">
+            </div>
+            <label>Certificate</label>
+            <input type="text" id="edit_srv_cert" name="srv_cert">
+            <div class="datetime-group">
+                <label>Last Service Date</label>
+                <input type="datetime-local" id="edit_srv_last_date" name="srv_last_date">
+            </div>
+            <div class="datetime-group">
+                <label>Next Service Date</label>
+                <input type="datetime-local" id="edit_srv_next_date" name="srv_next_date">
+            </div>
+            <label>Post Condition <span class="required">*</span></label>
+            <select id="edit_srv_post_condition" name="srv_post_condition" required>
+                <option value="New">New</option>
+                <option value="Good">Good</option>
+                <option value="Poor">Poor</option>
+                <option value="Bad">Bad</option>
+            </select>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal hidden" onclick="closeModal('deleteModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Confirm Delete</h2>
+            <button type="button" class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
+        </div>
+        <p>Are you sure you want to delete this service record?</p>
+        <form method="POST" action="/Service/delete">
+            <input type="hidden" id="delete_srv_id" name="srv_id">
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th class="sortable">Manufacturer</th>
+            <th class="sortable">Model</th>
+            <th class="sortable">Location</th>
+            <th class="sortable">Gauge #</th>
+            <!-- <th class="sortable">Type</th> -->
+            <th class="sortable">Description</th>
+            <th class="sortable">User</th>
+            <th class="sortable">Calibration Date</th>
+            <th class="sortable">Certificate</th>
+            <th class="sortable">Last Service</th>
+            <th class="sortable">Next Service</th>
+            <th class="sortable">Post Condition</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for srv in services %}
+        <tr>
+            <td>{{ srv.mfr_name }}</td>
+            <td>{{ srv.md_name }}</td>
+            <td>{{ srv.loc_name }}</td>
+            <td>{{ srv.srv_asset_tag }}</td>
+            <!-- <td>{{ srv.srv_type }}</td> -->
+            <td>{{ srv.srv_description }}</td>
+            <td>{{ srv.user_name }}</td>
+            <td>{{ srv.srv_calibration_date | fmt_ts }}</td>
+            <td>{{ srv.srv_cert }}</td>
+            <td>{{ srv.srv_last_date | fmt_ts }}</td>
+            <td>{{ srv.srv_next_date | fmt_ts }}</td>
+            <td>{{ srv.srv_post_condition }}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="openEdit(
+                    '{{ srv.srv_id }}',
+                    '{{ srv.srv_md_id }}', '{{ srv.srv_loc_id }}', '{{ srv.srv_asset_tag | e }}',
+                    '{{ srv.srv_description | e }}',
+                    '{{ srv.srv_user_id }}', '{{ srv.srv_calibration_date }}',
+                    '{{ srv.srv_cert | e }}', '{{ srv.srv_last_date }}', '{{ srv.srv_next_date }}',
+                    '{{ srv.srv_post_condition }}'
+                )">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ srv.srv_id }}')">Delete</button>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="12" style="text-align:center;">No service records found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function openEdit(id, mdId, locId, assetTag, descr, userId, calDate, cert, lastDate, nextDate, postCond) {
+    document.getElementById('edit_srv_id').value = id;
+    document.getElementById('edit_srv_md_id').value = mdId;
+    document.getElementById('edit_srv_loc_id').value = locId;
+    document.getElementById('edit_srv_asset_tag').value = assetTag;
+    // document.getElementById('edit_srv_type').value = type;
+    document.getElementById('edit_srv_description').value = descr;
+    document.getElementById('edit_srv_user_id').value = userId;
+    document.getElementById('edit_srv_calibration_date').value = calDate;
+    document.getElementById('edit_srv_cert').value = cert;
+    document.getElementById('edit_srv_last_date').value = lastDate;
+    document.getElementById('edit_srv_next_date').value = nextDate;
+    document.getElementById('edit_srv_post_condition').value = postCond;
+    openModal('editModal');
+}
+
+function confirmDelete(id) {
+    document.getElementById('delete_srv_id').value = id;
+    openModal('deleteModal');
+}
+</script>
+
+{% endblock %}
