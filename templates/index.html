@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Conforumance Manager{% endblock %}
+{% block title %}Conformance Manager{% endblock %}
 
-{% block page_title %}CRIMan{% endblock %}
+{% block page_title %}Conformance Manager{% endblock %}
 
 {% block content %}
     <h2>Upcoming Service</h2>
 
-    <table class="data-table">
+    <div class="toolbar">
+        <input type="text" class="table-search" placeholder="Search..." oninput="filterTable(this, 'tbl-home')">
+    </div>
+
+    <table class="data-table" id="tbl-home">
         <thead>
             <tr>
                 <th class="sortable">Certificate</th>

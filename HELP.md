@@ -1,6 +1,6 @@
-# CRIMan Help
+# Conformance Manager Help
 
-CRIMan is calibration and service record management system.
+Conformance Manager is a calibration and service record management system.
 
 ---
 
@@ -49,7 +49,7 @@ Records marked **Bad** are excluded from standard exports but included in the Da
 
 ### Locations
 
-Manage facility locations (e.g. CRM, CRI, NGHT). Locations are assigned to service records
+Manage facility locations (e.g. Facility-A, Facility-B, Facility-C). Locations are assigned to service records
 and to users. Default locations are seeded on first run.
 
 ### Users

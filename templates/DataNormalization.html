@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Data Normalization{% endblock %}
+{% block page_title %}Data Normalization{% endblock %}
+
+{% block content %}
+<style>
+.dn-card      { border:1px solid #ddd; border-radius:8px; padding:1rem 1.5rem; min-width:140px; background:#fff; }
+.dn-card-warn { border:1px solid #ffc107; border-radius:8px; padding:1rem 1.5rem; min-width:140px; background:#fff3cd; }
+.dn-card-ok   { border:1px solid #c3e6cb; border-radius:8px; padding:1rem 1.5rem; min-width:140px; background:#d4edda; }
+.dn-card-num  { font-size:1.8rem; font-weight:700; }
+.dn-card-lbl  { color:#888; font-size:0.85rem; }
+</style>
+
+{% if normalized is not none %}
+<div style="background:#d4edda; border:1px solid #c3e6cb; color:#155724; padding:12px 16px; border-radius:6px; margin-bottom:1rem;">
+    {% if normalized | int == 0 %}
+        No duplicate manufacturers found — already normalized.
+    {% else %}
+        Manufacturer normalization complete: {{ normalized }} group(s) merged.
+    {% endif %}
+</div>
+{% endif %}
+
+{% if normalized_models is not none %}
+<div style="background:#d4edda; border:1px solid #c3e6cb; color:#155724; padding:12px 16px; border-radius:6px; margin-bottom:1rem;">
+    {% if normalized_models | int == 0 %}
+        No duplicate models found — already normalized.
+    {% else %}
+        Model normalization complete: {{ normalized_models }} group(s) merged.
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Summary cards -->
+<div style="display:flex; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+    <div class="dn-card">
+        <div class="dn-card-num">{{ manufacturers | length }}</div>
+        <div class="dn-card-lbl">Manufacturers</div>
+    </div>
+    <div class="dn-card">
+        <div class="dn-card-num">{{ models | length }}</div>
+        <div class="dn-card-lbl">Models</div>
+    </div>
+    <div class="dn-card">
+        <div class="dn-card-num">{{ service_count }}</div>
+        <div class="dn-card-lbl">Service Records</div>
+    </div>
+    <div class="{% if mfr_duplicates %}dn-card-warn{% else %}dn-card-ok{% endif %}">
+        <div class="dn-card-num">{{ mfr_duplicates | length }}</div>
+        <div class="dn-card-lbl">Duplicate Mfr Groups</div>
+    </div>
+    <div class="{% if model_duplicates %}dn-card-warn{% else %}dn-card-ok{% endif %}">
+        <div class="dn-card-num">{{ model_duplicates | length }}</div>
+        <div class="dn-card-lbl">Duplicate Model Groups</div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MANUFACTURER NORMALIZATION                                    -->
+<!-- ============================================================ -->
+<h3 style="margin-bottom:0.75rem;">Duplicate Manufacturers</h3>
+{% if mfr_duplicates %}
+<p style="color:#856404; background:#fff3cd; border:1px solid #ffc107; padding:10px 14px; border-radius:6px; margin-bottom:1rem;">
+    The following manufacturer names appear more than once.
+    Normalizing keeps the record with the most linked models and remaps all others.
+</p>
+<table class="data-table" style="margin-bottom:1.5rem;">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Kept (mfr_id)</th>
+            <th class="sortable">Models Linked</th>
+            <th>Duplicates to Remove</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in mfr_duplicates %}
+        <tr>
+            <td><strong>{{ group[0].mfr_name }}</strong></td>
+            <td style="font-family:monospace; font-size:0.8rem;">{{ group[0].mfr_id }}</td>
+            <td>{{ group[0].model_count }}</td>
+            <td>
+                {% for dup in group[1:] %}
+                <span style="display:inline-block; background:#f8d7da; color:#721c24; border-radius:4px; padding:2px 8px; margin:2px; font-size:0.82rem;">
+                    {{ dup.mfr_name }} ({{ dup.model_count }} models)
+                </span>
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<form method="POST" action="/DataNormalization/normalize"
+      onsubmit="return confirm('Permanently merge duplicate manufacturers. Continue?');">
+    <button type="submit" class="btn btn-primary">Normalize Manufacturers</button>
+</form>
+{% else %}
+<p style="color:#155724;">No duplicate manufacturers detected.</p>
+{% endif %}
+
+<!-- ============================================================ -->
+<!-- MODEL NORMALIZATION                                           -->
+<!-- ============================================================ -->
+<h3 style="margin-top:2.5rem; margin-bottom:0.75rem;">Duplicate Models</h3>
+{% if mfr_duplicates %}
+<p style="color:#856404; background:#fff3cd; border:1px solid #ffc107; padding:10px 14px; border-radius:6px;">
+    Model normalization is disabled until all duplicate manufacturers are resolved.
+    Run <strong>Normalize Manufacturers</strong> above first.
+</p>
+{% elif model_duplicates %}
+<p style="color:#856404; background:#fff3cd; border:1px solid #ffc107; padding:10px 14px; border-radius:6px; margin-bottom:1rem;">
+    The following models share the same Name, Size, End Size, and Manufacturer.
+    Normalizing keeps the record with the most linked service entries and remaps all others.
+</p>
+<table class="data-table" style="margin-bottom:1.5rem;">
+    <thead>
+        <tr>
+            <th class="sortable">Name</th>
+            <th class="sortable">Size</th>
+            <th class="sortable">End Size</th>
+            <th class="sortable">Manufacturer</th>
+            <th class="sortable">Service Records (kept)</th>
+            <th>Duplicates to Remove</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in model_duplicates %}
+        <tr>
+            <td><strong>{{ group[0].md_name }}</strong></td>
+            <td>{{ group[0].md_size }}</td>
+            <td>{{ group[0].md_endsize }}</td>
+            <td>{{ group[0].mfr_name }}</td>
+            <td>{{ group[0].service_count }}</td>
+            <td>
+                {% for dup in group[1:] %}
+                <span style="display:inline-block; background:#f8d7da; color:#721c24; border-radius:4px; padding:2px 8px; margin:2px; font-size:0.82rem;">
+                    {{ dup.md_id[:8] }}… ({{ dup.service_count }} svc)
+                </span>
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<form method="POST" action="/DataNormalization/normalize-models"
+      onsubmit="return confirm('Permanently merge duplicate models and remap service records. Continue?');">
+    <button type="submit" class="btn btn-primary">Normalize Models</button>
+</form>
+{% else %}
+<p style="color:#155724;">No duplicate models detected.</p>
+{% endif %}
+
+<!-- ============================================================ -->
+<!-- REFERENCE TABLES                                              -->
+<!-- ============================================================ -->
+<h3 style="margin-top:2.5rem; margin-bottom:0.75rem;">Manufacturers</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th class="sortable">Name</th>
+            <th>ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mfr in manufacturers %}
+        <tr>
+            <td>{{ mfr.mfr_name }}</td>
+            <td style="font-family:monospace; font-size:0.8rem; color:#888;">{{ mfr.mfr_id }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="2" style="text-align:center;">No manufacturers found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3 style="margin-top:2rem; margin-bottom:0.75rem;">Models</h3>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th class="sortable">Model Name</th>
+            <th class="sortable">Size</th>
+            <th class="sortable">End Size</th>
+            <th class="sortable">Manufacturer</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for md in models %}
+        <tr>
+            <td>{{ md.md_name }}</td>
+            <td>{{ md.md_size }}</td>
+            <td>{{ md.md_endsize }}</td>
+            <td>{{ md.mfr_name }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="text-align:center;">No models found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

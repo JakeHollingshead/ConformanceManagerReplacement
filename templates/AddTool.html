@@ -55,8 +55,6 @@
     <div id="mfr-new-section" style="display:none">
         <label>Manufacturer Name <span class="required">*</span></label>
         <input type="text" id="new_mfr_name" name="new_mfr_name" placeholder="e.g. Acme Gauges Inc.">
-        <label>Description</label>
-        <textarea id="new_mfr_descr" name="new_mfr_descr" rows="2" placeholder="Optional"></textarea>
     </div>
 
     <div class="wizard-nav">
@@ -99,8 +97,6 @@
         <input type="text" id="new_md_size" name="new_md_size" placeholder="e.g. 1">
         <label>Size Two</label>
         <input type="text" id="new_md_endsize" name="new_md_endsize" placeholder="e.g. 4">
-        <label>Description</label>
-        <textarea id="new_md_description" name="new_md_description" rows="2" placeholder="Optional"></textarea>
     </div>
 
     <div class="wizard-nav">
@@ -124,7 +120,7 @@
         {% endfor %}
     </select>
 
-    <label>Gauge Number</label>
+    <label>Gauge Serial Number</label>
     <input type="text" name="uni_asset_tag" placeholder="e.g. G-00142">
 
     <label>Calibrated By<span class="required">*</span></label>
@@ -134,6 +130,9 @@
         <option value="{{ user.user_id }}">{{ user.user_name }}</option>
         {% endfor %}
     </select>
+
+    <label>Owner</label>
+    <input type="text" name="srv_owner" placeholder="e.g. Quality Dept.">
 
     <label style="display:flex; align-items:center; gap:0.5rem;">
         Certificate

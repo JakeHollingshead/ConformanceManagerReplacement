@@ -7,9 +7,10 @@
 {% block content %}
 <div class="toolbar">
     <button class="btn btn-primary" onclick="openModal('addMdModal')">+ New Model</button>
+    <input type="text" class="table-search" placeholder="Search..." oninput="filterTable(this, 'tbl-models')">
 </div>
 
-<table class="data-table">
+<table class="data-table" id="tbl-models">
     <thead>
         <tr>
             <!-- <th>ID</th> -->
@@ -17,7 +18,6 @@
             <th class="sortable">Size</th>
             <th class="sortable">End Size</th>
             <th class="sortable">Manufacturer</th>
-            <th class="sortable">Description</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -29,7 +29,6 @@
             <td>{{ md.md_size }}</td>
             <td>{{ md.md_endsize }}</td>
             <td>{{ md.mfr_name }}</td>
-            <td>{{ md.md_description }}</td>
             <td>
                 <button class="btn btn-sm btn-secondary"
                     data-md-id="{{ md.md_id }}"
@@ -37,13 +36,12 @@
                     data-md-size="{{ md.md_size | e }}"
                     data-md-endsize="{{ md.md_endsize | e }}"
                     data-md-mfr-id="{{ md.md_mfr_id }}"
-                    data-md-description="{{ md.md_description | e }}"
                     onclick="openEditMd(this)">Edit</button>
                 <button class="btn btn-sm btn-danger" onclick="confirmDeleteMd('{{ md.md_id }}')">Delete</button>
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="6" style="text-align:center;">No models found.</td></tr>
+        <tr><td colspan="5" style="text-align:center;">No models found.</td></tr>
         {% endfor %}
     </tbody>
 </table>
@@ -68,8 +66,6 @@
                 <option value="{{ mfr.mfr_id }}">{{ mfr.mfr_name }}</option>
                 {% endfor %}
             </select>
-            <label>Description</label>
-            <textarea name="md_description"></textarea>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">Save</button>
                 <button type="button" class="btn btn-secondary" onclick="closeModal('addMdModal')">Cancel</button>
@@ -99,8 +95,6 @@
                 <option value="{{ mfr.mfr_id }}">{{ mfr.mfr_name }}</option>
                 {% endfor %}
             </select>
-            <label>Description</label>
-            <textarea id="edit_md_description" name="md_description"></textarea>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">Save</button>
                 <button type="button" class="btn btn-secondary" onclick="closeModal('editMdModal')">Cancel</button>
@@ -134,7 +128,6 @@ function openEditMd(btn) {
     document.getElementById('edit_md_size').value = btn.dataset.mdSize;
     document.getElementById('edit_md_endsize').value = btn.dataset.mdEndsize;
     document.getElementById('edit_md_mfr_id').value = btn.dataset.mdMfrId;
-    document.getElementById('edit_md_description').value = btn.dataset.mdDescription;
     openModal('editMdModal');
 }
 function confirmDeleteMd(id) {

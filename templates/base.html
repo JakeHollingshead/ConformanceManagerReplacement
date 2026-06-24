@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}CRIMan{% endblock %}</title>
+    <title>{% block title %}Conformance Manager{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <!-- Top Navigation Bar -->
     <nav class="topnav">
         <div class="topnav-brand">
-            <img src="/static/GenLogo.png" alt="Gen Logo" class="topnav-logo">
+            <img src="/static/GenLogo.png" alt="Company Logo" class="topnav-logo">
+            <span class="topnav-version">{{ db_version }}</span>
         </div>
         <ul class="topnav-links">
 
@@ -86,7 +87,7 @@
 
             <!-- Data dropdown -->
             <li class="nav-dropdown">
-                <button class="nav-dropdown-toggle {% if request.path in ['/Export', '/Import', '/Scheduler'] %}active{% endif %}"
+                <button class="nav-dropdown-toggle {% if request.path in ['/Export', '/Import', '/Scheduler', '/DataNormalization'] %}active{% endif %}"
                         onclick="toggleDropdown(this)">
                     <span class="nav-icon">📊</span>
                     <span class="nav-text">Data</span>
@@ -101,6 +102,11 @@
                     <li>
                         <a href="/Import" class="nav-dropdown-item {% if request.path == '/Import' %}active{% endif %}">
                             Import
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/DataNormalization" class="nav-dropdown-item {% if request.path == '/DataNormalization' %}active{% endif %}">
+                            Data Normalization
                         </a>
                     </li>
                     <li>
@@ -132,6 +138,13 @@
     </div>
 
 <script>
+function filterTable(input, tableId) {
+    const q = input.value.toLowerCase();
+    document.querySelectorAll('#' + tableId + ' tbody tr').forEach(function(row) {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
 function toggleDropdown(btn) {
     const dropdown = btn.closest('.nav-dropdown');
     const wasOpen = dropdown.classList.contains('open');

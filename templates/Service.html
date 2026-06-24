@@ -7,6 +7,7 @@
 
 <div class="toolbar">
     <button class="btn btn-primary" onclick="openModal('addModal')">+ New Service Record</button>
+    <input type="text" class="table-search" placeholder="Search..." oninput="filterTable(this, 'tbl-service')">
 </div>
 
 <!-- Add Modal -->
@@ -44,6 +45,8 @@
                 <option value="{{ user.user_id }}">{{ user.user_name }}</option>
                 {% endfor %}
             </select>
+            <label>Owner</label>
+            <input type="text" name="srv_owner" placeholder="e.g. Quality Dept.">
             <div class="datetime-group">
                 <label>Calibration Date</label>
                 <input type="datetime-local" name="srv_calibration_date">
@@ -107,6 +110,8 @@
                 <option value="{{ user.user_id }}">{{ user.user_name }}</option>
                 {% endfor %}
             </select>
+            <label>Owner</label>
+            <input type="text" id="edit_srv_owner" name="srv_owner" placeholder="e.g. Quality Dept.">
             <div class="datetime-group">
                 <label>Calibration Date</label>
                 <input type="datetime-local" id="edit_srv_calibration_date" name="srv_calibration_date">
@@ -154,16 +159,17 @@
     </div>
 </div>
 
-<table class="data-table">
+<table class="data-table" id="tbl-service">
     <thead>
         <tr>
             <th class="sortable">Manufacturer</th>
             <th class="sortable">Model</th>
             <th class="sortable">Location</th>
-            <th class="sortable">Gauge #</th>
+            <th class="sortable">Gauge Serial #</th>
             <!-- <th class="sortable">Type</th> -->
             <th class="sortable">Description</th>
             <th class="sortable">User</th>
+            <th class="sortable">Owner</th>
             <th class="sortable">Calibration Date</th>
             <th class="sortable">Certificate</th>
             <th class="sortable">Last Service</th>
@@ -182,6 +188,7 @@
             <!-- <td>{{ srv.srv_type }}</td> -->
             <td>{{ srv.srv_description }}</td>
             <td>{{ srv.user_name }}</td>
+            <td>{{ srv.srv_owner }}</td>
             <td>{{ srv.srv_calibration_date | fmt_ts }}</td>
             <td>{{ srv.srv_cert }}</td>
             <td>{{ srv.srv_last_date | fmt_ts }}</td>
@@ -192,7 +199,8 @@
                     '{{ srv.srv_id }}',
                     '{{ srv.srv_md_id }}', '{{ srv.srv_loc_id }}', '{{ srv.srv_asset_tag | e }}',
                     '{{ srv.srv_description | e }}',
-                    '{{ srv.srv_user_id }}', '{{ srv.srv_calibration_date }}',
+                    '{{ srv.srv_user_id }}', '{{ srv.srv_owner | e }}',
+                    '{{ srv.srv_calibration_date }}',
                     '{{ srv.srv_cert | e }}', '{{ srv.srv_last_date }}', '{{ srv.srv_next_date }}',
                     '{{ srv.srv_post_condition }}'
                 )">Edit</button>
@@ -200,7 +208,7 @@
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="12" style="text-align:center;">No service records found.</td></tr>
+        <tr><td colspan="13" style="text-align:center;">No service records found.</td></tr>
         {% endfor %}
     </tbody>
 </table>
@@ -209,7 +217,7 @@
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-function openEdit(id, mdId, locId, assetTag, descr, userId, calDate, cert, lastDate, nextDate, postCond) {
+function openEdit(id, mdId, locId, assetTag, descr, userId, owner, calDate, cert, lastDate, nextDate, postCond) {
     document.getElementById('edit_srv_id').value = id;
     document.getElementById('edit_srv_md_id').value = mdId;
     document.getElementById('edit_srv_loc_id').value = locId;
@@ -217,6 +225,7 @@ function openEdit(id, mdId, locId, assetTag, descr, userId, calDate, cert, lastD
     // document.getElementById('edit_srv_type').value = type;
     document.getElementById('edit_srv_description').value = descr;
     document.getElementById('edit_srv_user_id').value = userId;
+    document.getElementById('edit_srv_owner').value = owner;
     document.getElementById('edit_srv_calibration_date').value = calDate;
     document.getElementById('edit_srv_cert').value = cert;
     document.getElementById('edit_srv_last_date').value = lastDate;

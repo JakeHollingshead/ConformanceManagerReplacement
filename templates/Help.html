@@ -7,7 +7,7 @@
 <div style="max-width: 860px; line-height: 1.7;">
 
     <p style="color:#555; margin-bottom:28px;">
-        CRIMan is calibration and service record management system.
+        Conformance Manager is a calibration and service record management system.
         Use the sections below to understand each part of the application.
     </p>
 
@@ -17,6 +17,7 @@
         <p style="margin:0; color:#555;">
             Displays all active service records sorted by <strong>Next Service Date</strong> (soonest first).
             Use this view to quickly identify gauges approaching or past their service due date.
+            Type in the <strong>Search</strong> box to instantly filter the table by any field.
         </p>
     </div>
 
@@ -27,9 +28,10 @@
             A three-step wizard for registering a new gauge and its initial service record in one flow.
         </p>
         <ol style="margin:0; padding-left:20px; color:#555;">
-            <li><strong>Manufacturer</strong> — Select an existing manufacturer or create a new one.</li>
-            <li><strong>Model</strong> — Select an existing model for that manufacturer or add a new model with size details.</li>
-            <li><strong>Service</strong> — Set the location, gauge number, calibrated-by user, certificate number, service dates, and post-condition.</li>
+            <li><strong>Manufacturer</strong> — Select an existing manufacturer or enter a name to create a new one.</li>
+            <li><strong>Model</strong> — Select an existing model for that manufacturer or add a new model with Size and End Size.</li>
+            <li><strong>Unit &amp; Service</strong> — Set the location, gauge serial number, calibrated-by user, owner,
+                certificate number, calibration date, last/next service dates, and post-condition.</li>
         </ol>
         <p style="margin:10px 0 0; color:#555;">
             The certificate number is auto-incremented. Check <strong>Override</strong> to enter a custom value.
@@ -42,23 +44,27 @@
 
         <h3 style="font-size:15px; margin:0 0 6px;">Manufacturers</h3>
         <p style="margin:0 0 16px; color:#555;">
-            Manage the list of gauge manufacturers. Each manufacturer has a name and description.
+            Manage the list of gauge manufacturers. Each manufacturer has a <strong>name</strong>.
             Models are linked to a manufacturer, so add manufacturers before adding models.
+            Use the Search box to filter the list by name.
         </p>
 
         <h3 style="font-size:15px; margin:0 0 6px;">Models</h3>
         <p style="margin:0 0 16px; color:#555;">
-            Manage gauge models. Each model belongs to a manufacturer and includes a name, size range (Size / End Size), and description.
+            Manage gauge models. Each model belongs to a manufacturer and includes a
+            <strong>name</strong>, <strong>Size</strong>, and <strong>End Size</strong>.
             Service records reference a model directly.
+            Use the Search box to filter by any field.
         </p>
 
         <h3 style="font-size:15px; margin:0 0 6px;">Service</h3>
         <p style="margin:0; color:#555;">
             The central record of all calibration activity. Each service record captures:
-            manufacturer, model, location, gauge serial number, technician, calibration date,
-            certificate number, last/next service dates, and post-condition
-            (<em>New, Good, Poor, Bad</em>).
+            manufacturer, model, location, <strong>gauge serial number</strong>, technician (Calibrated By),
+            <strong>owner</strong>, calibration date, certificate number, last/next service dates, and
+            post-condition (<em>New, Good, Poor, Bad</em>).
             Records marked <strong>Bad</strong> are excluded from standard exports but included in the Damaged Units export.
+            Use the Search box to filter across all columns.
         </p>
     </div>
 
@@ -68,14 +74,14 @@
 
         <h3 style="font-size:15px; margin:0 0 6px;">Locations</h3>
         <p style="margin:0 0 16px; color:#555;">
-            Manage facility locations (e.g. CRM, CRI, NGHT). Locations are assigned to service records
+            Manage facility locations (e.g. Facility-A, Facility-B, Facility-C). Locations are assigned to service records
             and to users. Default locations are seeded on first run.
         </p>
 
         <h3 style="font-size:15px; margin:0 0 6px;">Users</h3>
         <p style="margin:0; color:#555;">
             Manage calibration technicians. Each user has a name and an assigned location.
-            Users are selected as the "Calibrated By" person when creating or editing service records.
+            Users appear as the <strong>Calibrated By</strong> person on service records.
         </p>
     </div>
 
@@ -100,6 +106,29 @@
             Rows with matching IDs are updated; new IDs are inserted. Blank rows are skipped.
         </p>
 
+        <h3 style="font-size:15px; margin:0 0 6px;">Data Normalization</h3>
+        <p style="margin:0 0 10px; color:#555;">
+            Detects and merges duplicate records to keep the database clean.
+            Two normalization passes are available and must be run in order:
+        </p>
+        <ol style="margin:0 0 16px; padding-left:20px; color:#555;">
+            <li>
+                <strong>Normalize Manufacturers</strong> — Groups manufacturers that share the same name
+                (case-insensitive). Keeps the record with the most linked models and remaps all
+                <code>md_mfr_id</code> references before deleting the duplicates.
+            </li>
+            <li>
+                <strong>Normalize Models</strong> — Only available after manufacturer duplicates are resolved.
+                Groups models that share the same Name, Size, End Size, and Manufacturer.
+                Keeps the record with the most linked service entries and remaps all
+                <code>srv_md_id</code> references before deleting the duplicates.
+            </li>
+        </ol>
+        <p style="margin:0 0 16px; color:#555;">
+            The page displays summary cards showing how many duplicate groups exist.
+            A confirmation prompt is shown before any merge is applied.
+        </p>
+
         <h3 style="font-size:15px; margin:0 0 6px;">Schedule</h3>
         <p style="margin:0; color:#555;">
             Create scheduled report recipients. Each schedule has a name, description, email address,
@@ -112,11 +141,14 @@
     <div style="background:#f9f7f2; border:1px solid #e8e2d0; border-radius:8px; padding:20px; margin-bottom:18px;">
         <h2 style="color:#A99A6F; margin:0 0 10px; font-size:17px;">Tips</h2>
         <ul style="margin:0; padding-left:20px; color:#555;">
-            <li>Click any column header to sort the table by that column. Click again to reverse.</li>
+            <li>Click any column header marked with a sort indicator to sort the table by that column. Click again to reverse.</li>
+            <li>Use the <strong>Search</strong> box on Home, Manufacturers, Models, and Service to instantly filter rows — no page reload needed.</li>
             <li>Add manufacturers and locations before adding models or users.</li>
             <li>Certificate numbers are auto-incremented (0001, 0002 …). Use Override only when assigning a specific number.</li>
             <li>Use the Import template to bulk-load data into a fresh installation.</li>
-            <li>Records with condition <strong>Bad</strong> remain in the database but are hidden from the home view and standard exports.</li>
+            <li>Records with condition <strong>Bad</strong> remain in the database but are excluded from the Home view and standard exports.</li>
+            <li>Run <strong>Data Normalization</strong> after imports to merge any duplicate manufacturers or models introduced by bulk data.</li>
+            <li>The current database version is displayed in the top navigation bar next to the company logo.</li>
         </ul>
     </div>
 

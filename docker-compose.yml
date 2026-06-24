@@ -1,5 +1,5 @@
 services:
-  criit:
+  conformance-manager:
     build: .
     restart: unless-stopped
     ports:

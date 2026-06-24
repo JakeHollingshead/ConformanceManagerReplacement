@@ -18,10 +18,10 @@ OUTLOOK_SENDER_PASSWORD = os.getenv("OUTLOOK_SENDER_PASSWORD")
 OUTLOOK_SMTP_SERVER = os.getenv("OUTLOOK_SMTP_SERVER", "smtp.office365.com")
 OUTLOOK_SMTP_PORT = int(os.getenv("OUTLOOK_SMTP_PORT", "587"))
 
-RECIPIENT_CRIHOST = os.getenv("RECIPIENT_CRIHOST")
+RECIPIENT_HOST = os.getenv("RECIPIENT_HOST")
 RECIPIENT_CARRIER_GATEWAY = os.getenv("RECIPIENT_CARRIER_GATEWAY")
-RECIPIENT_EMAIL = f"{RECIPIENT_CRIHOST}@{RECIPIENT_CARRIER_GATEWAY}"
-CRIIT_BASE_URL = os.getenv("CRIIT_BASE_URL", "http://localhost:5000")
+RECIPIENT_EMAIL = f"{RECIPIENT_HOST}@{RECIPIENT_CARRIER_GATEWAY}"
+APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:5000")
 
 
 def send_message(
@@ -43,12 +43,12 @@ def send_message(
     if body:
         body_text = body
     else:
-        body_parts = ["Service schedule notification from CRI Conformance Manager."]
+        body_parts = ["Service schedule notification from Conformance Manager."]
         if tkt_id:
             body_parts.append(f"Ticket ID: {tkt_id}")
         if subject:
             body_parts.append(f"Subject: {subject}")
-        body_parts.append(f"Link: {CRIIT_BASE_URL}/Tickets")
+        body_parts.append(f"Link: {APP_BASE_URL}/Tickets")
         body_text = "\n".join(body_parts)
 
     msg.attach(MIMEText(body_text, "plain"))

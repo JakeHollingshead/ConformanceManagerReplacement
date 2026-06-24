@@ -7,14 +7,14 @@
 {% block content %}
 <div class="toolbar">
     <button class="btn btn-primary" onclick="openModal('addMfrModal')">+ New Manufacturer</button>
+    <input type="text" class="table-search" placeholder="Search..." oninput="filterTable(this, 'tbl-manufacturers')">
 </div>
 
-<table class="data-table">
+<table class="data-table" id="tbl-manufacturers">
     <thead>
         <tr>
             <!-- <th>ID</th> -->
             <th class="sortable">Name</th>
-            <th class="sortable">Description</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -23,18 +23,16 @@
         <tr>
             <!-- <td>{{ mfr.mfr_id }}</td> -->
             <td>{{ mfr.mfr_name }}</td>
-            <td>{{ mfr.mfr_descr }}</td>
             <td>
                 <button class="btn btn-sm btn-secondary"
                     data-mfr-id="{{ mfr.mfr_id }}"
                     data-mfr-name="{{ mfr.mfr_name | e }}"
-                    data-mfr-descr="{{ mfr.mfr_descr | e }}"
                     onclick="openEditMfr(this)">Edit</button>
                 <button class="btn btn-sm btn-danger" onclick="confirmDeleteMfr('{{ mfr.mfr_id }}')">Delete</button>
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="4" style="text-align:center;">No manufacturers found.</td></tr>
+        <tr><td colspan="2" style="text-align:center;">No manufacturers found.</td></tr>
         {% endfor %}
     </tbody>
 </table>
@@ -46,8 +44,6 @@
         <form method="POST" action="/Manufacturers/add">
             <label>Name</label>
             <input type="text" name="mfr_name" required>
-            <label>Description</label>
-            <textarea name="mfr_descr" required></textarea>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">Save</button>
                 <button type="button" class="btn btn-secondary" onclick="closeModal('addMfrModal')">Cancel</button>
@@ -67,8 +63,6 @@
             <input type="hidden" id="edit_mfr_id" name="mfr_id">
             <label>Name</label>
             <input type="text" id="edit_mfr_name" name="mfr_name" required>
-            <label>Description</label>
-            <textarea id="edit_mfr_descr" name="mfr_descr" required></textarea>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">Save</button>
                 <button type="button" class="btn btn-secondary" onclick="closeModal('editMfrModal')">Cancel</button>
@@ -99,7 +93,6 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function openEditMfr(btn) {
     document.getElementById('edit_mfr_id').value = btn.dataset.mfrId;
     document.getElementById('edit_mfr_name').value = btn.dataset.mfrName;
-    document.getElementById('edit_mfr_descr').value = btn.dataset.mfrDescr;
     openModal('editMfrModal');
 }
 function confirmDeleteMfr(id) {
